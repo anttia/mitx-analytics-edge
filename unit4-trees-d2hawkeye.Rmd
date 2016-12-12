@@ -1,0 +1,24 @@
+---
+title: "MITx Analytics Edge: Unit 4: Trees: D2Hawkeye"
+output: html_notebook
+---
+
+
+
+```{r}
+Claims = read.csv("datasets/ClaimsData.csv")
+str(Claims)
+```
+
+```{r}
+table(Claims$bucket2009)/nrow(Claims)
+```
+
+```{r}
+library(caTools)
+set.seed(88)
+spl = sample.split(Claims, SplitRatio=0.6)
+ClaimsTest = subset(Claims, spl == FALSE)
+ClaimsTrain = subset(Claims, spl == True)
+```
+
