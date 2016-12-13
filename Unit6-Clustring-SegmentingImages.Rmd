@@ -1,0 +1,124 @@
+---
+title: "MITx The Analytics Edge -- Unit 6 Clustering -- Segmenting Images"
+output: html_notebook
+---
+
+Flower.csv sisältää 50x50 kokoisen matriisin grayscale-arvoja väliltä 0-1.
+
+```{r}
+flower = read.csv("datasets/flower.csv", header=FALSE)
+flowerMatrix = as.matrix(flower)
+mean(flowerMatrix)
+```
+
+50x50 matriisi voidaan muuttaa 2500 solun kokoiseksi vektoriksi: 
+
+```{r}
+flowerVector = as.vector(flowerMatrix)
+length(flowerVector)
+```
+
+Lasketaan etäisyysmatriisi ja tehdään hierarkinen klusterointi (vaikka en ymmärräkään yhtään että mitä tässä tapahtuu). Funktiolla "rect.hclust" piirretään punaiset laatikoit niiden klusterien ympärille jotka halutaan poistaa hierarkiasta ylimääräisinä.
+
+```{r}
+distance = dist(flowerVector, method="euclidian")
+clusterIntencity = hclust(distance, method="ward.D")
+plot(clusterIntencity)
+rect.hclust(clusterIntencity, k=3, border="red")
+```
+
+Parametrilla k=3 voidaan leikata tästä puusta pois kaikki ylimääräiset haarat näiden 3 haaran lisäksi. Kuten näkyy niin kaikki data on nyt luokiteltu näihin 3 klusteriin.
+
+```{r}
+flowerClusters = cutree(clusterIntencity, k=3)
+table(flowerClusters)/length(flowerClusters)
+```
+
+Piirretään grayscale-kuva ruudulle väritettynä sen pikseleille annettujen klusteriluokitusten perusteella:
+
+```{r}
+dim(flowerClusters) = c(50,50)
+image(flowerClusters, axes=FALSE)
+```
+
+Ladataan toinen datasetti joka sisältää MRI brain scan kuvan:
+
+```{r}
+healthy = read.csv("datasets/healthy.csv", header=FALSE)
+healthyMatrix = as.matrix(healthy)
+str(healthyMatrix)
+```
+
+Piirretään matriisi joka sisältää kuvan väriarvot ruudulle grayscale-paletilla väritettynä:
+
+```{r}
+image(healthyMatrix, axes=FALSE, col=gray(seq(0, 1, length=256)))
+```
+
+Dist-funktio joutuu laskemaan näin monta arvoa (66 miljardia) jos syötämme healthyVector sille parametriksi, siksi on parempi käyttää jotain muuta toimintatapaa:
+
+```{r}
+healthyVector = as.vector(healthyMatrix)
+n=length(healthyVector)
+n*(n-1)/2
+```
+
+Hierarkisen klusteroinnin sijaan korkean resoluution kuvaa klusteroidessa täytyy käyttää K-Means klusterointia:
+
+```{r}
+set.seed(1)
+k=5
+KMC = kmeans(healthyVector, centers=k, iter.max=1000)
+str(KMC)
+```
+
+KMC$centers avulla voidaan tarkastella eri klustereille annettuja intensiteettiarvoja:
+
+```{r}
+healthyClusters = KMC$cluster
+KMC$centers
+```
+
+Kun muutetaan healthyClusters matriisiksi, niin voimme visualisoida klusterit image-funktion avulla:
+
+```{r}
+dim(healthyClusters) = c(nrow(healthyMatrix), ncol(healthyMatrix))
+image(healthyClusters, axes=FALSE, col=rainbow(k))
+```
+
+Ladataan uusi MRI-aivokuva jossa potilaalla tiedetään olevan aivokasvain. Flexclust-kirjaston kcca-funktio implementoi k-centroids cluster analysis -menetelmän.
+
+```{r}
+library(flexclust)
+
+tumor = read.csv("datasets/tumor.csv", header=FALSE)
+tumorMatrix = as.matrix(tumor)
+tumorVector = as.vector(tumorMatrix)
+
+KMC.kcca = as.kcca(KMC, healthyVector)
+tumorClusters = predict(KMC.kcca, newdata=tumorVector)
+```
+
+Kcca-metodin tuottamat klusteridata voidaan muuttaa matriisiksi ja visualisoida image-funktion avulla. Jostain syystä kuva piirtyi vaakatasoon vaikka videoissa se piirtyi samalla koodilla pystytasoon (pieni virhe jossain?).
+
+```{r}
+dim(tumorClusters) = c(nrow(tumorMatrix), ncol(tumorMatrix))
+image(tumorClusters, axes=FALSE, col=rainbow(k))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

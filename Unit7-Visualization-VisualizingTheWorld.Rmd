@@ -1,0 +1,42 @@
+---
+title: "mitx analytics edge -- unit 7 visualization -- visualizing the world"
+output: html_notebook
+---
+
+
+```{r}
+WHO = read.csv("datasets/WHO.csv")
+str(WHO)
+```
+
+```{r}
+plot(WHO$GNI, WHO$FertilityRate)
+```
+```{r}
+library(ggplot2)
+scatterplot = ggplot(WHO, aes(x=GNI, y=FertilityRate))
+scatterplot + geom_point()
+```
+```{r}
+scatterplot + geom_point(color="blue", size=3, shape=17)
+```
+```{r}
+fertilityGNIplot = scatterplot + geom_point(color="darkred", size=3, shape=15) + ggtitle("Fertility Rate vs GNI")
+fertilityGNIplot
+```
+```{r}
+pdf("MyPlot.pdf")
+print(fertilityGNIplot)
+dev.off()
+```
+```{r}
+ggplot(WHO, aes(x = GNI, y = FertilityRate, col = Region)) + geom_point()
+```
+```{r}
+ggplot(WHO, aes(x=log(FertilityRate), y=Under15)) + geom_point() + stat_smooth(method="lm", level=0.99)
+```
+
+```{r}
+ggplot(WHO, aes(x=FertilityRate, y=Under15, col=Region)) + geom_point()
+```
+

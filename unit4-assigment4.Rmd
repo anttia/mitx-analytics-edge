@@ -1,0 +1,21 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+gerber = read.csv("datasets/gerber.csv")
+str(gerber)
+```
+
+```{r}
+mean(gerber$voting)
+```
+
+```{r}
+print(mean(gerber$voting[gerber["hawthorne"]==1]))
+print(mean(gerber$voting[gerber["civicduty"]==1]))
+print(mean(gerber$voting[gerber["self"]==1]))
+print(mean(gerber$voting[gerber["neighbors"]==1]))
+```
+
